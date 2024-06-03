@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "assemblyscript": "^0.27.27"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./build/release.js",
+      "types": "./build/release.d.ts"
+    }
+  },
+  "scripts": {
+    "asbuild:debug": "asc assembly/index.ts --target debug",
+    "asbuild:release": "asc assembly/index.ts --target release",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "test": "tsc -p tests --outDir ./tests/out && node --experimental-specifier-resolution=node tests/out/tests",
+    "start": "npx serve ."
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.27"
+  }
+}

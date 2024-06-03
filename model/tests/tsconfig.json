@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "outDir": "./out",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "../node_modules/assemblyscript/std/types/assembly/index.d.ts"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}
