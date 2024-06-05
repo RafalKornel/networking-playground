@@ -1,56 +1,32 @@
-import * as application from "./layers/application";
-import * as presentation from "./layers/presentation";
-import * as session from "./layers/session";
-import * as network from "./layers/network";
-import * as transport from "./layers/transport";
-import * as dataLink from "./layers/data-link";
-import * as physical from "./layers/physical";
-import { encodeUtf8 } from "./textEncoder";
+import { DataType, IComposer, ILayer } from "./types";
 
-export function sendMessage(message: string): void {
-  const data = encodeUtf8(message);
+export class Composer implements IComposer {
+  /** Direction of layers: at index 0 is LOWEST layer, every layer with higher index is above */
+  private _layers: ILayer[] = [];
 
-  physical.down(
-    //
-    dataLink.down(
-      //
-      transport.down(
-        //
-        network.down(
-          //
-          session.down(
-            //
-            presentation.down(
-              //
-              application.down(data)
-            )
-          )
-        )
-      )
-    )
-  );
-}
+  add(layer: ILayer): IComposer {
+    this._layers.push(layer);
 
-export function digestMessage(data: Uint32Array): void {
-  const message = application.up(
-    //
-    presentation.up(
-      //
-      session.up(
-        //
-        network.up(
-          //
-          transport.up(
-            //
-            dataLink.up(
-              //
-              physical.up(data)
-            )
-          )
-        )
-      )
-    )
-  );
+    return this;
+  }
 
-  console.log(message.toString());
+  propagateDown(data: DataType): DataType {
+    let currData = data;
+
+    for (let i = this._layers.length - 1; i >= 0; i--) {
+      currData = this._layers[i].down(currData);
+    }
+
+    return currData;
+  }
+
+  propagateUp(data: DataType): DataType {
+    let currData = data;
+
+    for (let i = 0; i < this._layers.length; i++) {
+      currData = this._layers[i].up(currData);
+    }
+
+    return currData;
+  }
 }

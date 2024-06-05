@@ -1,7 +1,12 @@
-export function up(data: Uint32Array): Uint32Array {
-  return data;
-}
+import { DataType, ILayer } from "../types";
 
-export function down(data: Uint32Array): Uint32Array {
-  return data;
+export class DataLinkLayer implements ILayer {
+  constructor() {}
+  up(data: DataType): DataType {
+    return data;
+  }
+
+  down(data: DataType): DataType {
+    return data;
+  }
 }
