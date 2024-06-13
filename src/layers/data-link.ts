@@ -2,11 +2,11 @@ import { DataType, ILayer } from "../types.ts";
 
 export class DataLinkLayer implements ILayer {
   constructor() {}
-  up(data: DataType): DataType {
+  receive(data: DataType): DataType {
     return data;
   }
 
-  down(data: DataType): DataType {
+  send(data: DataType): DataType {
     return data;
   }
 }

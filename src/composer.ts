@@ -14,7 +14,10 @@ export class Composer implements IComposer {
     let currData = data;
 
     for (let i = this._layers.length - 1; i >= 0; i--) {
-      currData = this._layers[i].down(currData);
+      const layerReponse = this._layers[i].send(currData);
+      if (!layerReponse) break;
+
+      currData = layerReponse;
     }
 
     return currData;
@@ -24,7 +27,10 @@ export class Composer implements IComposer {
     let currData = data;
 
     for (let i = 0; i < this._layers.length; i++) {
-      currData = this._layers[i].up(currData);
+      const layerReponse = this._layers[i].receive(currData);
+      if (!layerReponse) break;
+
+      currData = layerReponse;
     }
 
     return currData;

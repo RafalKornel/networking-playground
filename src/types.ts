@@ -1,8 +1,8 @@
-export type DataType = Uint32Array;
+export type DataType = Uint8Array;
 
 export interface ILayer {
-  up(data: DataType): DataType;
-  down(data: DataType): DataType;
+  receive(data: DataType): DataType | void;
+  send(data: DataType, ...args: unknown[]): DataType | void;
 }
 
 export interface IComposer {

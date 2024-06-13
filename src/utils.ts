@@ -1,4 +1,4 @@
-export function encodeUtf8(str: string): Uint32Array {
+export function encodeUtf8(str: string): Uint8Array {
   const utf8: i32[] = [];
 
   for (let i = 0; i < str.length; i++) {
@@ -25,14 +25,14 @@ export function encodeUtf8(str: string): Uint32Array {
     }
   }
 
-  const result = new Uint32Array(utf8.length);
+  const result = new Uint8Array(utf8.length);
   for (let i = 0; i < utf8.length; i++) {
     result[i] = utf8[i];
   }
   return result;
 }
 
-export function decodeUtf8(data: Uint32Array): string {
+export function decodeUtf8(data: Uint8Array): string {
   let str = "";
   let i = 0;
 
@@ -72,4 +72,16 @@ export function decodeUtf8(data: Uint32Array): string {
   }
 
   return str;
+}
+
+export function arrayToHex(arr: number[]): number {
+  // Concatenate the array values into a single hexadecimal string
+  const hexString = arr
+    .map((num) => num.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Convert the concatenated string to a number
+  const hexNumber = parseInt(hexString, 16);
+
+  return hexNumber;
 }

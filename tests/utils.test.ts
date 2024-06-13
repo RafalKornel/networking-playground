@@ -1,11 +1,10 @@
 import { assertEquals } from "jsr:@std/assert";
-import { decodeUtf8, encodeUtf8 } from "./utils.ts";
+import { arrayToHex, decodeUtf8, encodeUtf8 } from "../src/utils.ts";
 
-const createUint32Array = (data: number[]): Uint32Array =>
-  new Uint32Array(data);
+const createUint32Array = (data: number[]): Uint8Array => new Uint8Array(data);
 
 // Test cases
-const testCases: { stringData: string; rawData: Uint32Array }[] = [
+const testCases: { stringData: string; rawData: Uint8Array }[] = [
   // Test case 1: ASCII characters
   { stringData: "Hello", rawData: createUint32Array([72, 101, 108, 108, 111]) },
 
@@ -81,4 +80,10 @@ Deno.test(function decodeTest() {
       console.log();
     }
   });
+});
+
+Deno.test(function arrayToHexTest() {
+  assertEquals(arrayToHex([0x08, 0x06]), 0x0806);
+  assertEquals(arrayToHex([0x08]), 0x08);
+  assertEquals(arrayToHex([0x08, 0xff]), 0x08ff);
 });
