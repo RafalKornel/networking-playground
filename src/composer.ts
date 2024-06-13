@@ -1,4 +1,4 @@
-import { DataType, IComposer, ILayer } from "./types";
+import { DataType, IComposer, ILayer } from "./types.ts";
 
 export class Composer implements IComposer {
   /** Direction of layers: at index 0 is LOWEST layer, every layer with higher index is above */

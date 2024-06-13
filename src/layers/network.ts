@@ -1,6 +1,6 @@
-import { DataType, ILayer } from "../types";
+import { DataType, ILayer } from "../types.ts";
 
-export class PresentationLayer implements ILayer {
+export class NetworkLayer implements ILayer {
   constructor() {}
   up(data: DataType): DataType {
     return data;

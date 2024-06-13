@@ -1,6 +1,6 @@
-import { DataType, ILayer } from "../types";
+import { DataType, ILayer } from "../types.ts";
 
-export class SessionLayer implements ILayer {
+export class PhysicalLayer implements ILayer {
   constructor() {}
   up(data: DataType): DataType {
     return data;
