@@ -1,10 +1,12 @@
 import { DataType } from "../types.ts";
 
-export function arrayToHex(arr: number[]): number {
+const BYTE_SIZE = 1;
+
+export function arrayToHex(arr: number[], hexSize?: number): number {
   if (!arr.length) return 0;
 
   const hexString = arr
-    .map((num) => num.toString(16).padStart(2, "0"))
+    .map((num) => num.toString(16).padStart(hexSize || BYTE_SIZE, "0"))
     .join("");
 
   const hexNumber = parseInt(hexString, 16);
@@ -12,23 +14,30 @@ export function arrayToHex(arr: number[]): number {
   return hexNumber;
 }
 
-export function hexToArray(hex: number, byteSize?: number): number[] {
-  const hexString = hex.toString(16); // Convert to hexadecimal string
+export function hexToArray(hex: number, hexSize: number = 1): number[] {
+  const hexString = hex.toString(16);
   const result: number[] = [];
 
-  const hexStringDefaultPad =
-    hexString.length % 2 === 0 ? hexString.length : hexString.length + 1;
+  const paddedHexString = hexString.padStart(hexSize, "0");
 
-  const padLength = byteSize ? byteSize * 2 : hexStringDefaultPad;
+  // console.log(hexString, paddedHexString);
 
-  const paddedHexString = hexString.padStart(padLength, "0");
-
-  for (let i = 0; i < paddedHexString.length; i += 2) {
-    const byteStr = paddedHexString.slice(i, i + 2);
+  for (let i = 0; i < paddedHexString.length; i += BYTE_SIZE) {
+    const byteStr = paddedHexString.slice(i, i + BYTE_SIZE);
     result.push(parseInt(byteStr, 16));
   }
 
   return result;
+}
+
+export function hexToDataFrame(hex: number, hexSize?: number): DataType {
+  const array = hexToArray(hex, hexSize);
+
+  return new Uint8Array(array);
+}
+
+export function hexToMacAdress(hex: number): MacAddress {
+  return hexToArray(hex, 6) as unknown as MacAddress;
 }
 
 export function selectBytes(

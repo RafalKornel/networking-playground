@@ -11,6 +11,7 @@ export type EthernetFrameType = [
 
 const MAC_ADDRESS_BYTE_LENGTH = 6;
 
+// TODO: fix and refactor!!!
 export class EthernetFrameParser {
   static ARPMessageType = 0x0806;
 

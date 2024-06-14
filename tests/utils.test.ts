@@ -3,135 +3,88 @@ import {
   getIndices,
   hexToArray,
   selectBytes,
-  decodeUtf8,
-  encodeUtf8,
   arrayToHex,
 } from "../src/utils/index.ts";
 
-const createUint32Array = (data: number[]): Uint8Array => new Uint8Array(data);
-
-// Test cases
-const testCases: { stringData: string; rawData: Uint8Array }[] = [
-  // Test case 1: ASCII characters
-  { stringData: "Hello", rawData: createUint32Array([72, 101, 108, 108, 111]) },
-
-  // Test case 2: Latin-1 Supplement characters
-  {
-    stringData: "Çüéñ",
-    rawData: createUint32Array([195, 135, 195, 188, 195, 169, 195, 177]),
-  },
-
-  // Test case 3: Latin Extended-A characters
-  {
-    stringData: "ĀāĂă",
-    rawData: createUint32Array([196, 128, 196, 129, 196, 130, 196, 131]),
-  },
-
-  // Test case 4: Cyrillic characters
-  {
-    stringData: "Привет",
-    rawData: createUint32Array([
-      208, 159, 209, 128, 208, 184, 208, 178, 208, 181, 209, 130,
-    ]),
-  },
-
-  // Test case 5: Emoji (Smiley face)
-  { stringData: "😊", rawData: createUint32Array([240, 159, 152, 138]) },
-];
-
-const VERBOSE = false;
-
-Deno.test("encodeUtf8", function encodeTest() {
-  testCases.forEach((testCase, index) => {
-    const result = encodeUtf8(testCase.stringData);
-    const rawDataString = testCase.rawData.toString();
-    const returnValueString = result.toString();
-
-    assertEquals(returnValueString, rawDataString);
-
-    if (VERBOSE) {
-      const resultMessage =
-        returnValueString === rawDataString ? "PASS" : "FAIL";
-
-      console.log(
-        `Test case ${index + 1}: ${resultMessage} | ${
-          testCase.stringData
-        } => ${returnValueString}`
-      );
-
-      console.log(`Expected: ${rawDataString}`);
-      console.log(`Returned: ${returnValueString}`);
-    }
-  });
-});
-
-Deno.test(function decodeTest() {
-  testCases.forEach((testCase, index) => {
-    const result = decodeUtf8(testCase.rawData);
-    const rawDataString = testCase.rawData.toString();
-
-    assertEquals(result, testCase.stringData);
-
-    if (VERBOSE) {
-      const resultMessage = result === testCase.stringData ? "PASS" : "FAIL";
-
-      console.log(
-        `Test case ${
-          index + 1
-        }: ${resultMessage} | ${rawDataString} => ${result}`
-      );
-
-      console.log(`Expected: ${testCase.stringData}`);
-      console.log(`Returned: ${result}`);
-      console.log();
-    }
-  });
-});
-
-Deno.test("arrayToHex", function arrayToHexTest() {
-  assertEquals(arrayToHex([0x08, 0x06]), 0x0806);
-  assertEquals(arrayToHex([0x08]), 0x08);
-  assertEquals(arrayToHex([0x08, 0xff]), 0x08ff);
+Deno.test("arrayToHex - regular", function arrayToHexTest() {
+  assertEquals(arrayToHex([0x8, 0x6]), 0x86);
+  assertEquals(arrayToHex([0x8]), 0x8);
+  assertEquals(arrayToHex([0x8, 0xff]), 0x8ff);
   assertEquals(arrayToHex([0x00, 0xff]), 0x00ff);
-  assertEquals(arrayToHex([0x08, 0x00]), 0x0800);
+  assertEquals(arrayToHex([0x08, 0x00]), 0x80);
 
   assertEquals(arrayToHex([]), 0);
 });
 
-Deno.test("hexToArray", function () {
-  assertEquals(hexToArray(0x0102), [1, 2]);
-  assertEquals(hexToArray(0x1010), [16, 16]);
-  assertEquals(hexToArray(0x0002, 2), [0, 2]);
-  assertEquals(hexToArray(0x0000, 2), [0, 0]);
-  assertEquals(hexToArray(0x0000), [0]);
-  assertEquals(hexToArray(0x00), [0]);
-  assertEquals(hexToArray(0x0000ff), [255]);
-  assertEquals(hexToArray(0x0000ff, 3), [0, 0, 255]);
-  assertEquals(hexToArray(0xff00), [255, 0]);
+Deno.test("arrayToHex - hexSize param", function arrayToHexTest() {
+  assertEquals(arrayToHex([0x08, 0x06], 2), 0x0806);
+  assertEquals(arrayToHex([0x08], 2), 0x08);
+  assertEquals(arrayToHex([0x08, 0xff], 2), 0x08ff);
+  assertEquals(arrayToHex([0x00, 0xff], 2), 0x00ff);
+  assertEquals(arrayToHex([0x08, 0x00], 2), 0x0800);
+
+  assertEquals(arrayToHex([], 2), 0);
+
+  assertEquals(arrayToHex([0x800, 0x006], 3), 0x800006);
+  assertEquals(arrayToHex([0x8], 3), 0x008);
+  assertEquals(arrayToHex([0x080, 0xff0], 3), 0x080ff0);
+
+  assertEquals(arrayToHex([], 3), 0);
 });
 
-Deno.test("selectBytes", function selectBytesTest() {
-  const data = new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0x00]);
+Deno.test("hexToArray - regular", function () {
+  assertEquals(hexToArray(0x0102), [1, 0, 2]);
+  assertEquals(hexToArray(0x1010), [1, 0, 1, 0]);
+  assertEquals(hexToArray(0xffff), [15, 15, 15, 15]);
 
-  assertEquals(selectBytes(data, "number", 0, 1), 0xaabb);
-  assertEquals(selectBytes(data, "number", 0, 2), 0xaacc);
-  assertEquals(selectBytes(data, "number", 0, 1, 2), 0xaabbcc);
-  assertEquals(selectBytes(data, "number", 0, 2, 1), 0xaabbcc);
-  assertEquals(selectBytes(data, "number", 0), 0xaa);
-  assertEquals(selectBytes(data, "number", 1), 0xbb);
-  assertEquals(selectBytes(data, "number", 2), 0xcc);
-  assertEquals(selectBytes(data, "number", 3, 4), 0xdd00);
+  assertEquals(hexToArray(0x0000), [0]);
+  assertEquals(hexToArray(0x00), [0]);
+  assertEquals(hexToArray(0x0000ff), [15, 15]);
+  assertEquals(hexToArray(0xff00), [15, 15, 0, 0]);
+});
+
+Deno.test("hexToArray - hexSize and byteSize param", function () {
+  assertEquals(hexToArray(0x0002, 4), [0, 0, 0, 2]);
+  assertEquals(hexToArray(0x0002, 2), [0, 2]);
+  assertEquals(hexToArray(0x0000, 4), [0, 0, 0, 0]);
+  assertEquals(hexToArray(0x1000, 4), [1, 0, 0, 0]);
+  assertEquals(hexToArray(0x1000, 2), [1, 0, 0, 0]);
+  assertEquals(hexToArray(0x1000, 2), [1, 0, 0, 0]);
+  assertEquals(hexToArray(0x0000, 2), [0, 0]);
+  assertEquals(hexToArray(0x0000, 4), [0, 0, 0, 0]);
+  assertEquals(hexToArray(0x0000ff, 3), [0, 15, 15]);
+  assertEquals(hexToArray(0x0000ff, 2), [15, 15]);
+  assertEquals(hexToArray(0x0000ff, 4), [0, 0, 15, 15]);
+  assertEquals(hexToArray(0x0000ff, 1), [15, 15]);
+});
+
+Deno.test("selectBytes - number", function selectBytesTest() {
+  const data = new Uint8Array(hexToArray(0xaabbccdd00));
+
+  assertEquals(selectBytes(data, "number", 0, 1), 0xaa);
+  assertEquals(selectBytes(data, "number", 0, 2), 0xab);
+  assertEquals(selectBytes(data, "number", 0, 1, 2), 0xaab);
+  assertEquals(selectBytes(data, "number", 0, 2, 1), 0xaab);
+  assertEquals(selectBytes(data, "number", 0), 0xa);
+  assertEquals(selectBytes(data, "number", 1), 0xa);
+  assertEquals(selectBytes(data, "number", 2), 0xb);
+  assertEquals(selectBytes(data, "number", 3, 4), 0xbc);
   assertEquals(selectBytes(data, "number", 10), 0);
+  assertEquals(selectBytes(data, "number", 11), 0);
+});
 
-  assertEquals(selectBytes(data, "array", 0, 1), [0xaa, 0xbb]);
-  assertEquals(selectBytes(data, "array", 0, 2), [0xaa, 0xcc]);
-  assertEquals(selectBytes(data, "array", 0, 1, 2), [0xaa, 0xbb, 0xcc]);
-  assertEquals(selectBytes(data, "array", 0, 2, 1), [0xaa, 0xbb, 0xcc]);
-  assertEquals(selectBytes(data, "array", 0), [0xaa]);
-  assertEquals(selectBytes(data, "array", 1), [0xbb]);
-  assertEquals(selectBytes(data, "array", 2), [0xcc]);
-  assertEquals(selectBytes(data, "array", 3, 4), [0xdd, 0x00]);
-  assertEquals(selectBytes(data, "array", 10), []);
+Deno.test("selectBytes - array", function () {
+  const data = new Uint8Array(hexToArray(0xaabbccdd00));
+
+  assertEquals(selectBytes(data, "array", 0, 1), [0xa, 0xa]);
+  assertEquals(selectBytes(data, "array", 0, 2), [0xa, 0xb]);
+  assertEquals(selectBytes(data, "array", 0, 1, 2), [0xa, 0xa, 0xb]);
+  assertEquals(selectBytes(data, "array", 0, 2, 1), [0xa, 0xa, 0xb]);
+  assertEquals(selectBytes(data, "array", 0), [0xa]);
+  assertEquals(selectBytes(data, "array", 1), [0xa]);
+  assertEquals(selectBytes(data, "array", 2), [0xb]);
+  assertEquals(selectBytes(data, "array", 3, 4), [0xb, 0xc]);
+  assertEquals(selectBytes(data, "array", 11), []);
 });
 
 Deno.test("getIndices", function () {

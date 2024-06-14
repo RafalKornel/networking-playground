@@ -2,17 +2,17 @@ import { DataType, ILayer } from "../../types.ts";
 import { EthernetFrameParser } from "./EthernetFrameParser.ts";
 
 export class ConnectionsManager {
-  private _connections: Set<EthernetDataLink> = new Set();
+  private _connections: Set<Ethernet> = new Set();
 
   constructor(private readonly maxConnections = 8) {}
 
-  public connect(other: EthernetDataLink) {
+  public connect(other: Ethernet) {
     if (this._connections.size === this.maxConnections) return;
 
     this._connections.add(other);
   }
 
-  public disconnect(other: EthernetDataLink) {
+  public disconnect(other: Ethernet) {
     this._connections.delete(other);
   }
 }
@@ -68,12 +68,16 @@ export class EthernetPhysical implements ILayer {
 }
 
 export class Ethernet implements ILayer {
+  public readonly connectionsManager: ConnectionsManager;
+
   private readonly _dataLinkLayer: EthernetDataLink;
   private readonly _physicalLayer: EthernetPhysical;
 
   constructor(public readonly macAddress: MacAddress) {
     this._dataLinkLayer = new EthernetDataLink(macAddress);
     this._physicalLayer = new EthernetPhysical(macAddress);
+
+    this.connectionsManager = new ConnectionsManager();
   }
 
   receive(data: Uint8Array): void | Uint8Array {
@@ -113,10 +117,8 @@ class EthernetDataLink implements ILayer {
 
       if (type === EthernetFrameParser.ARPMessageType) {
         return;
-      } 
+      }
 
-      
-      
       return frame;
     } catch {
       return;

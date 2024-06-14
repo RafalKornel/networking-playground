@@ -5,13 +5,13 @@ import { hexToArray } from "../src/utils/utils.ts";
 Deno.test("ARPFrameParser", function ARPFrameParserTest() {
   const parser = new ARPFrameParser();
 
-  const hardwareType = hexToArray(0x0001, 2);
-  const protocolType = hexToArray(0x0800, 2);
+  const hardwareType = hexToArray(0x01, 2);
+  const protocolType = hexToArray(0x80, 2);
 
   const hardwareLength = hexToArray(0x06);
   const protocolLength = hexToArray(0x04);
 
-  const operation = hexToArray(0x0001, 2);
+  const operation = hexToArray(0x01, 2);
 
   const senderHardwareAddress = [
     0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
@@ -40,7 +40,7 @@ Deno.test("ARPFrameParser", function ARPFrameParserTest() {
 
   assertEquals(parser.parse(frame), [
     1,
-    0x0800,
+    0x80,
     6,
     4,
     1,
