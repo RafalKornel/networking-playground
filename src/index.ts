@@ -7,15 +7,16 @@ import { NetworkLayer } from "./layers/network.ts";
 import { TransportLayer } from "./layers/transport.ts";
 import { DataLinkLayer } from "./layers/data-link.ts";
 import { PhysicalLayer } from "./layers/physical.ts";
-import { decodeUtf8, encodeUtf8 } from "./utils.ts";
-import { Ethernet } from "./blocks/Ethernet/ethernet.ts";
+import { decodeUtf8 } from "./utils/decodeUtf8.ts";
+import { encodeUtf8 } from "./utils/encodeUtf8.ts";
+import { EthernetDataLink } from "./blocks/Ethernet/ethernet.ts";
 
 export function connectionTest() {
-  const aNIC = new Ethernet([0xff, 0xff, 0xff, 0xff, 0xff, 0xaa]);
+  const aNIC = new EthernetDataLink([0xff, 0xff, 0xff, 0xff, 0xff, 0xaa]);
 
   const deviceA = new Composer().add(aNIC);
 
-  const bNIC = new Ethernet([0xff, 0xff, 0xff, 0xff, 0xff, 0xbb]);
+  const bNIC = new EthernetDataLink([0xff, 0xff, 0xff, 0xff, 0xff, 0xbb]);
 
   const deviceB = new Composer().add(bNIC);
 

@@ -1,5 +1,5 @@
 import { DataType } from "../../types.ts";
-import { arrayToHex } from "../../utils.ts";
+import { arrayToHex } from "../../utils/utils.ts";
 
 export type EthernetFrameType = [
   da: MacAddress,
