@@ -1,12 +1,12 @@
 import { DataType } from "../types.ts";
 
-const BYTE_SIZE = 1;
+const BYTE_SIZE_IN_HEX = 2;
 
 export function arrayToHex(arr: number[], hexSize?: number): number {
   if (!arr.length) return 0;
 
   const hexString = arr
-    .map((num) => num.toString(16).padStart(hexSize || BYTE_SIZE, "0"))
+    .map((num) => num.toString(16).padStart(hexSize || BYTE_SIZE_IN_HEX, "0"))
     .join("");
 
   const hexNumber = parseInt(hexString, 16);
@@ -22,8 +22,8 @@ export function hexToArray(hex: number, hexSize: number = 1): number[] {
 
   // console.log(hexString, paddedHexString);
 
-  for (let i = 0; i < paddedHexString.length; i += BYTE_SIZE) {
-    const byteStr = paddedHexString.slice(i, i + BYTE_SIZE);
+  for (let i = 0; i < paddedHexString.length; i += BYTE_SIZE_IN_HEX) {
+    const byteStr = paddedHexString.slice(i, i + BYTE_SIZE_IN_HEX);
     result.push(parseInt(byteStr, 16));
   }
 
@@ -52,6 +52,11 @@ export function selectBytes(
 ): number[];
 export function selectBytes(
   data: DataType,
+  asType: "Uint8Array",
+  ...indices: number[]
+): Uint8Array;
+export function selectBytes(
+  data: DataType,
   asType: unknown,
   ...indices: number[]
 ) {
@@ -69,9 +74,13 @@ export function selectBytes(
 
   if (asType === "number") {
     return arrayToHex(result);
-  } else {
-    return result;
   }
+
+  if (asType === "Uint8Array") {
+    return new Uint8Array(result);
+  }
+
+  return result;
 }
 
 export function getIndices(start: number, length: number) {

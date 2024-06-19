@@ -1,44 +1,40 @@
 import { DataType } from "../../types.ts";
-import { arrayToHex } from "../../utils/utils.ts";
+import { getIndices } from "../../utils/utils.ts";
+import { arrayToHex, selectBytes } from "../../utils/utils.ts";
 
 export type EthernetFrameType = [
   da: MacAddress,
   sa: MacAddress,
   type: number,
   frame: DataType,
-  fcs: [byte, byte, byte, byte]
+  fcs: DataType
 ];
 
 const MAC_ADDRESS_BYTE_LENGTH = 6;
 
-// TODO: fix and refactor!!!
 export class EthernetFrameParser {
   static ARPMessageType = 0x0806;
 
   public parse(frame: DataType): EthernetFrameType {
-    const da = this.parseMacAdress(frame.subarray(0, MAC_ADDRESS_BYTE_LENGTH));
+    const da = this.parseMacAdress(
+      selectBytes(frame, "array", 0, 1, 2, 3, 4, 5)
+    );
     const sa = this.parseMacAdress(
-      frame.subarray(MAC_ADDRESS_BYTE_LENGTH, 2 * MAC_ADDRESS_BYTE_LENGTH)
+      selectBytes(frame, "array", 6, 7, 8, 9, 10, 11)
     );
 
-    const type = this.parseType(
-      frame.subarray(
-        2 * MAC_ADDRESS_BYTE_LENGTH,
-        2 * MAC_ADDRESS_BYTE_LENGTH + 2
-      )
-    );
+    const type = selectBytes(frame, "number", 12, 13);
 
-    const rest = frame.subarray(
-      2 * MAC_ADDRESS_BYTE_LENGTH + 2,
-      frame.length - 4
-    );
+    const l = frame.length;
 
-    const fcs = this.parseFCS(frame.subarray(frame.length - 4));
+    const rest = selectBytes(frame, "Uint8Array", ...getIndices(14, l - 4));
+
+    const fcs = selectBytes(frame, "Uint8Array", l - 4, l - 3, l - 2, l - 1);
 
     return [da, sa, type, rest, fcs];
   }
 
-  private parseMacAdress(maybeAdr: DataType): MacAddress {
+  private parseMacAdress(maybeAdr: DataType | number[]): MacAddress {
     if (maybeAdr.length !== MAC_ADDRESS_BYTE_LENGTH) {
       throw new Error(`Incorrect Mac adress: ${maybeAdr.toLocaleString()}`);
     }
