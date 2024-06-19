@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- <script async src="a.out.js"></script> -->
+
+    <script async type="module">
+      import Module from "./build/example.js";
+
+      const m = await Module();
+
+      console.log(m);
+
+      const p = new m.PingPong();
+
+      p.Ping();
+      p.Pong();
+
+      console.log(p.getResult);
+      console.log(p);
+
+      // const add = await m.cwrap('add', 'number', ['number'])
+      // console.log(add(1, 2));
+      // console.log(add(10, 2));
+      // console.log(add(12, 2));
+      // console.log(add(1, 2));
+      // console.log(add(1, 2));
+
+    </script>
+  </body>
+</html>
