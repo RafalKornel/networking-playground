@@ -2,3 +2,4 @@ node_modules
 build
 tests/out
 testBuild
+*.o
