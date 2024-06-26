@@ -59,6 +59,7 @@
     "variant": "cpp",
     "vector": "cpp",
     "iostream": "cpp",
-    "memory": "cpp"
+    "memory": "cpp",
+    "iomanip": "cpp"
   }
 }

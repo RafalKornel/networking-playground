@@ -12,4 +12,4 @@ g++ -std=c++14 -c src/utilities/utilities.cpp -o build/utilities.o
 # g++ -std=c++14 -c src/**/*
 # g++ -std=c++14 src/**/*.o -o output
 
-g++ -std=c++14 build/main.o build/utilities.o build/composer.o build/ethernet.o -o output
+g++ -std=c++14 build/main.o build/utilities.o build/composer.o build/ethernet.o -o build/output && ./build/output

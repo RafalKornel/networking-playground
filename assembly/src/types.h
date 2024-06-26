@@ -6,6 +6,7 @@
 // Define DataType as a placeholder
 using DataType = uint8_t *;
 using Size = size_t;
+using MacAddress = uint8_t[6];
 
 struct Payload {
   Size size;
@@ -26,7 +27,7 @@ public:
 class INetworkComposer {
 public:
   virtual ~INetworkComposer() = default;
-  virtual INetworkComposer &add(INetworkLayer* layer) = 0;
+  virtual INetworkComposer &add(INetworkLayer *layer) = 0;
   virtual void propagateDown(Payload payload, Payload &out) = 0;
   virtual void propagateUp(Payload payload, Payload &out) = 0;
 };
