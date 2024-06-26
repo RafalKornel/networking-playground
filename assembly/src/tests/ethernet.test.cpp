@@ -5,6 +5,8 @@
 
 using namespace std;
 
+static const int VERBOSE = 0;
+
 void printEthernetPhysicalFrame(const EthernetPhysicalFrame &frame) {
   // Print preamble
   std::cout << "Preamble: ";
@@ -42,57 +44,25 @@ void test_parsePhysicalFrame() {
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
   };
 
-
-  
-  // std::unique_ptr<uint8_t[]> buffer(new
-  // uint8_t[sizeof(EthernetPhysicalFrame)]);
   std::unique_ptr<uint8_t[]> buffer(new uint8_t[sizeof(EthernetPhysicalFrame)]);
 
   memcpy(buffer.get(), &frame, sizeof(EthernetPhysicalFrame));
 
   auto parsedFrame = parsePhysicalFrame(std::move(buffer));
 
-  printEthernetPhysicalFrame(frame);
+  cout << "parsePhysicalFrame: "
+       << (memcmp(&frame, &parsedFrame, sizeof(EthernetDataLinkFrame)) == 0
+               ? "pass"
+               : "fail")
+       << endl;
 
-  cout << "Parsed: " << endl;
+  if (VERBOSE) {
+    printEthernetPhysicalFrame(frame);
 
-  printEthernetPhysicalFrame(parsedFrame);
+    cout << "Parsed: " << endl;
 
-  // cout << "Preamble: ";
-  // for (int i = 0; i < sizeof(frame.preamble); i++) {
-  //   cout << frame.preamble[i] << " | " << parsedFrame.preamble[i];
-  // }
-  // cout << endl;
-
-  // cout << "sfd: " << frame.sfd << " | " << parsedFrame.sfd << endl;
-
-  // cout << "payload: ";
-  // for (int i = 0; i < sizeof(frame.payload); i++) {
-  //   cout << frame.payload[i] << " | " << parsedFrame.payload[i];
-  // }
-  // cout << endl;
-
-  // cout << "ipg: ";
-  // for (int i = 0; i < sizeof(frame.ipg); i++) {
-  //   cout << frame.ipg[i] << " | " << parsedFrame.ipg[i];
-  // }
-  // cout << endl;
-
-  // cout << "Preamble: " << frame.preamble << " | " << sizeof(frame.preamble)
-  //      << " | " << parsedFrame.preamble << " | " <<
-  //      sizeof(parsedFrame.preamble)
-  //      << endl;
-
-  // cout << "sfd: " << frame.sfd << " | " << sizeof(frame.sfd) << " | "
-  //      << parsedFrame.sfd << " | " << sizeof(parsedFrame.sfd) << endl;
-
-  // cout << "payload: " << frame.payload << " | " << sizeof(frame.payload)
-  //      << " | " << parsedFrame.payload << " | " <<
-  //      sizeof(parsedFrame.payload)
-  //      << endl;
-
-  // cout << "ipg: " << frame.ipg << " | " << sizeof(frame.ipg) << " | "
-  //      << parsedFrame.ipg << " | " << sizeof(parsedFrame.ipg) << endl;
+    printEthernetPhysicalFrame(parsedFrame);
+  }
 }
 
 int main() {
