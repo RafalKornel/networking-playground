@@ -36,7 +36,7 @@ void printEthernetPhysicalFrame(const EthernetPhysicalFrame &frame) {
   std::cout << std::endl;
 }
 
-void test_parsePhysicalFrame() {
+int test_parsePhysicalFrame() {
   EthernetPhysicalFrame frame = {
       {0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa},
       1,
@@ -50,11 +50,7 @@ void test_parsePhysicalFrame() {
 
   auto parsedFrame = parsePhysicalFrame(std::move(buffer));
 
-  cout << "parsePhysicalFrame: "
-       << (memcmp(&frame, &parsedFrame, sizeof(EthernetDataLinkFrame)) == 0
-               ? "pass"
-               : "fail")
-       << endl;
+  auto result = memcmp(&frame, &parsedFrame, sizeof(EthernetDataLinkFrame));
 
   if (VERBOSE) {
     printEthernetPhysicalFrame(frame);
@@ -63,9 +59,16 @@ void test_parsePhysicalFrame() {
 
     printEthernetPhysicalFrame(parsedFrame);
   }
+
+  return result;
 }
 
-int main() {
-  test_parsePhysicalFrame();
+int EthernetPhysicalParser() {
+  cout << "Ethernet" << endl;
+  cout << "\tparsePhysicalFrame: "
+       << (test_parsePhysicalFrame() ? "fail" : "pass") << endl;
+
+  cout << endl;
+
   return 0;
 }

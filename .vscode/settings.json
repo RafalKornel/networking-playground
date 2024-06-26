@@ -60,6 +60,7 @@
     "vector": "cpp",
     "iostream": "cpp",
     "memory": "cpp",
-    "iomanip": "cpp"
+    "iomanip": "cpp",
+    "set": "cpp"
   }
 }

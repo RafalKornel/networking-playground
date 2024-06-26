@@ -2,14 +2,32 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream> // For std::stringstream
+#include <string>
+
+using namespace std;
 
 void printBufferToConsole(Payload &payload) {
-  std::cout << "Payload: \nSize: " << payload.size << " | ";
+  cout << "Payload: \nSize: " << payload.size << " | ";
 
   for (int i = 0; i < payload.size; ++i) {
-    std::cout << std::hex << std::setw(2) << std::setfill('0')
-              << static_cast<int>(payload.data[i]);
+    cout << hex << setw(2) << setfill('0') << static_cast<int>(payload.data[i]);
   }
 
-  std::cout << std::endl;
+  cout << endl;
+}
+
+string printMacAddress(const MacAddress address) {
+  std::stringstream ss;
+
+  ss << hex << setfill('0');
+
+  for (int i = 0; i < 6; ++i) {
+    ss << setw(2) << static_cast<int>(address[i]);
+    if (i < 5)
+      ss << ":";
+  }
+  ss << dec;
+
+  return ss.str();
 }

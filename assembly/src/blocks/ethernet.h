@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "../types.h"
 
 #ifndef ETHERNET_H
 #define ETHERNET_H
@@ -22,6 +23,13 @@ struct EthernetPhysicalFrame {
   uint8_t sfd;
   uint8_t payload[DATA_LINK_FRAME_SIZE];
   uint8_t ipg[12];
+};
+
+class Ethernet : public INetworkLayer {
+public:
+  const MacAddress macAddress;
+  void receive(Payload payload, Payload &out) override;
+  void send(Payload payload, Payload &out) override;
 };
 
 #endif
