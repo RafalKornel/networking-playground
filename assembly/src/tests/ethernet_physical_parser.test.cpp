@@ -1,11 +1,10 @@
+#include "./ethernet_physical_parser.test.h"
 #include "../blocks/ethernet.h"
 #include "../blocks/parser.h"
 #include <iostream>
 #include <memory>
 
 using namespace std;
-
-static const int VERBOSE = 0;
 
 void printEthernetPhysicalFrame(const EthernetPhysicalFrame &frame) {
   // Print preamble
@@ -52,7 +51,7 @@ int test_parsePhysicalFrame() {
 
   auto result = memcmp(&frame, &parsedFrame, sizeof(EthernetDataLinkFrame));
 
-  if (VERBOSE) {
+  if (EthernetPhysicalParserTest::VERBOSE) {
     printEthernetPhysicalFrame(frame);
 
     cout << "Parsed: " << endl;
@@ -63,10 +62,16 @@ int test_parsePhysicalFrame() {
   return result;
 }
 
-int EthernetPhysicalParser() {
-  cout << "Ethernet" << endl;
-  cout << "\tparsePhysicalFrame: "
-       << (test_parsePhysicalFrame() ? "fail" : "pass") << endl;
+int EthernetPhysicalParserTest::main() {
+  cout << "Ethernet physical parser" << endl;
+
+  auto result = test_parsePhysicalFrame();
+
+  cout << "\tparsePhysicalFrame: " << (result ? "fail" : "pass") << endl;
+
+  if (result) {
+    return 1;
+  }
 
   cout << endl;
 

@@ -19,8 +19,8 @@ struct Payload {
 class INetworkLayer {
 public:
   virtual ~INetworkLayer() = default;
-  virtual void send(Payload payload, Payload &out) = 0;
-  virtual void receive(Payload payload, Payload &out) = 0;
+  virtual int send(Payload payload, Payload &out) = 0;
+  virtual int receive(Payload payload, Payload &out) = 0;
 };
 
 // Interface for IComposer
@@ -28,8 +28,8 @@ class INetworkComposer {
 public:
   virtual ~INetworkComposer() = default;
   virtual INetworkComposer &add(INetworkLayer *layer) = 0;
-  virtual void propagateDown(Payload payload, Payload &out) = 0;
-  virtual void propagateUp(Payload payload, Payload &out) = 0;
+  virtual int propagateDown(Payload payload, Payload &out) = 0;
+  virtual int propagateUp(Payload payload, Payload &out) = 0;
 };
 
 #endif // TYPES_HPP

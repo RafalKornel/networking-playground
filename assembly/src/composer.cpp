@@ -16,7 +16,7 @@ public:
     return *this;
   }
 
-  void propagateDown(Payload payload, Payload &out) override {
+  int propagateDown(Payload payload, Payload &out) override {
     if (VERBOSE) {
       std::cout << "Propagading down data: " << std::endl;
 
@@ -40,9 +40,11 @@ public:
 
     out.data = currentPayload.data;
     out.size = currentPayload.size;
+
+    return 0;
   }
 
-  void propagateUp(Payload payload, Payload &out) override {
+  int propagateUp(Payload payload, Payload &out) override {
     if (VERBOSE) {
       std::cout << "Propagading up data: " << std::endl;
 
@@ -66,5 +68,7 @@ public:
 
     out.data = currentPayload.data;
     out.size = currentPayload.size;
+
+    return 0;
   }
 };

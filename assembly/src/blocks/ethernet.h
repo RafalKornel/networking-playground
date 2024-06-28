@@ -1,5 +1,6 @@
-#include <stdlib.h>
 #include "../types.h"
+#include "./connections_manager.h"
+#include <stdlib.h>
 
 #ifndef ETHERNET_H
 #define ETHERNET_H
@@ -27,9 +28,18 @@ struct EthernetPhysicalFrame {
 
 class Ethernet : public INetworkLayer {
 public:
+  Ethernet(const MacAddress &mA);
+
+  const shared_ptr<ConnectionsManager> connectionsManager;
   const MacAddress macAddress;
-  void receive(Payload payload, Payload &out) override;
-  void send(Payload payload, Payload &out) override;
+
+  int receive(Payload payload, Payload &out) override;
+  int send(Payload payload, Payload &out) override;
+
+  int connect(shared_ptr<Ethernet> other);
+  int disconnect(shared_ptr<Ethernet> other);
+
+  bool operator<(const Ethernet &other) const;
 };
 
 #endif

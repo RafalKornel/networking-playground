@@ -1,8 +1,8 @@
 #include "connections_manager.h"
-#include <iostream>
-
 #include "../types.h"
 #include "../utilities/utilities.h"
+#include <algorithm>
+#include <iostream>
 
 using namespace std;
 
@@ -110,7 +110,7 @@ int ConnectionsManager::disconnect(shared_ptr<ConnectionsManager> other) {
 };
 
 shared_ptr<const ConnectionsManager>
-ConnectionsManager::connection_at(int socket) {
+ConnectionsManager::connection_at(int socket) const {
   if (socket >= CONNECTIONS_POOL) {
     if (VERBOSE) {
       cout << "Socket out of bounds. Provided: " << socket
@@ -123,14 +123,16 @@ ConnectionsManager::connection_at(int socket) {
   return _connections[socket];
 }
 
-int ConnectionsManager::has_connection(const MacAddress address) {
+int ConnectionsManager::has_connection(const MacAddress address) const {
   for (int i = 0; i < CONNECTIONS_POOL; i++) {
-    if (_connections[i].get()->macAddress == address) {
-      return 1;
+    auto currAddress = _connections[i].get()->macAddress;
+
+    if (memcmp(&currAddress, &address, sizeof(MacAddress))) {
+      return 0;
     }
   }
 
-  return 0;
+  return 1;
 }
 
 void ConnectionsManager::print_connections() {

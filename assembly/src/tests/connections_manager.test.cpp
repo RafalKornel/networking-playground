@@ -1,4 +1,5 @@
 #include "../blocks/connections_manager.h"
+#include "./connections_manager.test.h"
 #include <iostream>
 #include <memory>
 
@@ -22,7 +23,11 @@ int connect_managers_test() {
     return 1;
   };
 
-  if (!m1.get()->has_connection(m2.get()->macAddress)) {
+  auto res = m1.get()->has_connection(m2.get()->macAddress);
+
+  auto is1ConnectedTo2 = m1.get()->has_connection(m2.get()->macAddress) == 0;
+
+  if (!is1ConnectedTo2) {
     cout << "Failed at hasConnection" << endl;
 
     return 1;
@@ -65,7 +70,7 @@ int connect_managers_test() {
   return 0;
 }
 
-int ConnectionsManagerTest() {
+int ConnectionsManagerTest::main() {
   cout << "ConnectionsManager" << endl;
 
   auto connect_managers_test_result = connect_managers_test();

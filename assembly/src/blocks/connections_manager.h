@@ -7,13 +7,15 @@
 using namespace std;
 
 static const int CONNECTIONS_POOL = 5;
-static const bool VERBOSE = false;
 
 class ConnectionsManager {
+
 private:
   shared_ptr<ConnectionsManager> _connections[CONNECTIONS_POOL];
 
 public:
+  static const bool VERBOSE = false;
+
   const MacAddress macAddress;
   ConnectionsManager(const MacAddress &mA);
 
@@ -23,8 +25,8 @@ public:
   int disconnect(shared_ptr<ConnectionsManager> other);
   int disconnect_at_socket(int socket);
 
-  int has_connection(const MacAddress address);
-  shared_ptr<const ConnectionsManager> connection_at(int socket);
+  int has_connection(const MacAddress address) const;
+  shared_ptr<const ConnectionsManager> connection_at(int socket) const;
 
   void print_connections();
 };
