@@ -1,6 +1,6 @@
-#include "blocks/ethernet.cpp"
-#include "composer.cpp"
-#include "utilities/utilities.h"
+#include "./blocks/ethernet.h"
+#include "./composer.h"
+#include "./utilities/utilities.h"
 #include <iostream>
 
 // EMSCRIPTEN_KEEPALIVE
@@ -36,6 +36,7 @@ void test() {
   delete composer;
   delete ethernet1;
   delete ethernet2;
+  delete data;
 }
 
 int main() {

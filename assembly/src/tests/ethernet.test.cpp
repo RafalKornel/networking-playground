@@ -16,14 +16,14 @@ int test_connect_disconnect() {
   ethernet2->connect(ethernet1);
 
   auto isAConnectedToB =
-      ethernet1->connectionsManager->has_connection(ethernet2->macAddress) == 0;
+      ethernet1->connectionsManager->has_connection(ethernet2) == 0;
 
   if (!isAConnectedToB) {
     return 1;
   }
 
   auto isBConnectedToA =
-      ethernet2->connectionsManager->has_connection(ethernet1->macAddress) == 0;
+      ethernet2->connectionsManager->has_connection(ethernet1) == 0;
 
   if (!isBConnectedToA) {
     return 1;

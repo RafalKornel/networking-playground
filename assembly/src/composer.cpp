@@ -1,74 +1,60 @@
-#include "types.h"
-#include "utilities/utilities.h"
-#include <iostream>
-#include <memory>
-#include <vector>
+#include "./composer.h"
 
-class Composer : public INetworkComposer {
-private:
-  std::vector<INetworkLayer *> layers;
+Composer &Composer::add(INetworkLayer *layer) {
+  layers.push_back(layer);
+  return *this;
+}
 
-  static const int VERBOSE = 0;
-
-public:
-  Composer &add(INetworkLayer *layer) override {
-    layers.push_back(layer);
-    return *this;
+int Composer::propagateDown(Payload payload, Payload &out) {
+  if (VERBOSE) {
+    std::cout << "Propagading down data: " << std::endl;
+    printBufferToConsole(payload);
   }
 
-  int propagateDown(Payload payload, Payload &out) override {
-    if (VERBOSE) {
-      std::cout << "Propagading down data: " << std::endl;
+  Payload previousPayload = {payload.size, payload.data};
+  Payload currentPayload = {payload.size, payload.data};
 
-      printBufferToConsole(payload);
-    }
+  for (int i = layers.size() - 1; i >= 0; i--) {
+    layers[i]->send(previousPayload, currentPayload);
 
-    Payload previousPayload = {payload.size, payload.data};
-    Payload currentPayload = {payload.size, payload.data};
+    if (currentPayload.data == nullptr)
+      break;
 
-    for (int i = layers.size() - 1; i >= 0; i--) {
-      layers[i]->send(previousPayload, currentPayload);
+    free(previousPayload.data);
 
-      if (currentPayload.data == nullptr)
-        break;
-
-      free(previousPayload.data);
-
-      previousPayload.size = currentPayload.size;
-      previousPayload.data = currentPayload.data;
-    }
-
-    out.data = currentPayload.data;
-    out.size = currentPayload.size;
-
-    return 0;
+    previousPayload.size = currentPayload.size;
+    previousPayload.data = currentPayload.data;
   }
 
-  int propagateUp(Payload payload, Payload &out) override {
-    if (VERBOSE) {
-      std::cout << "Propagading up data: " << std::endl;
+  out.data = currentPayload.data;
+  out.size = currentPayload.size;
 
-      printBufferToConsole(payload);
-    }
+  return 0;
+}
 
-    Payload previousPayload = {payload.size, payload.data};
-    Payload currentPayload = {payload.size, payload.data};
-
-    for (int i = 0; i < layers.size(); ++i) {
-      layers[i]->receive(previousPayload, currentPayload);
-
-      if (currentPayload.data == nullptr)
-        break;
-
-      free(previousPayload.data);
-
-      previousPayload.size = currentPayload.size;
-      previousPayload.data = currentPayload.data;
-    }
-
-    out.data = currentPayload.data;
-    out.size = currentPayload.size;
-
-    return 0;
+int Composer::propagateUp(Payload payload, Payload &out) {
+  if (VERBOSE) {
+    std::cout << "Propagading up data: " << std::endl;
+    printBufferToConsole(payload);
   }
-};
+
+  Payload previousPayload = {payload.size, payload.data};
+  Payload currentPayload = {payload.size, payload.data};
+
+  for (int i = 0; i < layers.size(); ++i) {
+    layers[i]->receive(previousPayload, currentPayload);
+
+    if (currentPayload.data == nullptr)
+      break;
+
+    free(previousPayload.data);
+
+    previousPayload.size = currentPayload.size;
+    previousPayload.data = currentPayload.data;
+  }
+
+  out.data = currentPayload.data;
+  out.size = currentPayload.size;
+
+  return 0;
+}

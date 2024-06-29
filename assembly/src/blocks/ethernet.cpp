@@ -5,10 +5,12 @@
 
 using namespace std;
 
+// template class ConnectionsManager<Ethernet>;
+
 Ethernet::Ethernet(const MacAddress &mA)
     : macAddress{mA[0], mA[1], mA[2], mA[3], mA[4], mA[5]},
-      connectionsManager(
-          shared_ptr<ConnectionsManager>(new ConnectionsManager(mA))) {}
+      connectionsManager(shared_ptr<ConnectionsManager<Ethernet>>(
+          new ConnectionsManager<Ethernet>(shared_ptr<Ethernet>(this)))) {}
 
 int Ethernet::receive(Payload payload, Payload &out) {
   out.size = payload.size + 1;
@@ -38,12 +40,14 @@ int Ethernet::send(Payload payload, Payload &out) {
 
 int Ethernet::connect(shared_ptr<Ethernet> other) {
   return connectionsManager.get()->connect(
-      shared_ptr<ConnectionsManager>(other.get()->connectionsManager));
+      shared_ptr<ConnectionsManager<Ethernet>>(
+          other.get()->connectionsManager));
 }
 
 int Ethernet::disconnect(shared_ptr<Ethernet> other) {
   return connectionsManager.get()->disconnect(
-      shared_ptr<ConnectionsManager>(other.get()->connectionsManager));
+      shared_ptr<ConnectionsManager<Ethernet>>(
+          other.get()->connectionsManager));
 }
 
 bool Ethernet::operator<(const Ethernet &other) const {

@@ -30,7 +30,7 @@ class Ethernet : public INetworkLayer {
 public:
   Ethernet(const MacAddress &mA);
 
-  const shared_ptr<ConnectionsManager> connectionsManager;
+  const shared_ptr<ConnectionsManager<Ethernet>> connectionsManager;
   const MacAddress macAddress;
 
   int receive(Payload payload, Payload &out) override;
