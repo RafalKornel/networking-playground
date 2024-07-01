@@ -2,6 +2,8 @@ rm  build/tests/*
 
 g++ -std=c++17 -c src/utilities/utilities.cpp -o build/tests/utilities.o
 
+g++ -std=c++17 -c src/utilities/event_listener.cpp -o build/tests/event_listener.o
+g++ -std=c++17 -c src/tests/event_listener.test.cpp -o build/tests/event_listener.test.o
 
 g++ -std=c++17 -c src/blocks/parser.cpp -o build/tests/parser.o 
 g++ -std=c++17 -c src/tests/ethernet_physical_parser.test.cpp -o build/tests/ethernet_physical_parser.o 
