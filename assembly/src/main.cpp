@@ -13,30 +13,30 @@ void test() {
   composer->add(ethernet1);
   composer->add(ethernet2);
 
-  size_t payloadSize = 3;
+  // size_t payloadSize = 3;
 
-  DataType data = (DataType)malloc(sizeof(uint8_t) * payloadSize);
-  data[0] = 0xaa;
-  data[1] = 0xbb;
-  data[2] = 0xcc;
+  // DataType data = (DataType)malloc(sizeof(uint8_t) * payloadSize);
+  // data[0] = 0xaa;
+  // data[1] = 0xbb;
+  // data[2] = 0xcc;
 
-  Payload payload = {payloadSize, data};
-  Payload result = {0, nullptr};
+  // Payload payload = {payloadSize, data};
+  // Payload result = {0, nullptr};
 
-  printBufferToConsole(payload);
+  // printBufferToConsole(payload);
 
-  composer->propagateDown(payload, result);
+  // composer->propagateDown(payload, result);
 
-  printBufferToConsole(result);
+  // printBufferToConsole(result);
 
-  composer->propagateUp(result, payload);
+  // composer->propagateUp(result, payload);
 
-  printBufferToConsole(payload);
+  // printBufferToConsole(payload);
 
-  delete composer;
-  delete ethernet1;
-  delete ethernet2;
-  delete data;
+  // delete composer;
+  // delete ethernet1;
+  // delete ethernet2;
+  // delete data;
 }
 
 int main() {

@@ -20,8 +20,6 @@ int Composer::propagateDown(Payload payload, Payload &out) {
     if (currentPayload.data == nullptr)
       break;
 
-    free(previousPayload.data);
-
     previousPayload.size = currentPayload.size;
     previousPayload.data = currentPayload.data;
   }
@@ -42,12 +40,10 @@ int Composer::propagateUp(Payload payload, Payload &out) {
   Payload currentPayload = {payload.size, payload.data};
 
   for (int i = 0; i < layers.size(); ++i) {
-    layers[i]->receive(previousPayload, currentPayload);
+    layers[i]->receive_listener(previousPayload, currentPayload);
 
     if (currentPayload.data == nullptr)
       break;
-
-    free(previousPayload.data);
 
     previousPayload.size = currentPayload.size;
     previousPayload.data = currentPayload.data;

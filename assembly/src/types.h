@@ -3,14 +3,15 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
-// Define DataType as a placeholder
-using DataType = uint8_t *;
+using namespace std;
+
+using DataType = uint8_t;
 using Size = size_t;
 using MacAddress = uint8_t[6];
 
 struct Payload {
   Size size;
-  DataType data;
+  shared_ptr<DataType> data;
 };
 
 // const size_t buffer_size = 1024;
@@ -20,7 +21,7 @@ class INetworkLayer {
 public:
   virtual ~INetworkLayer() = default;
   virtual int send(Payload payload, Payload &out) = 0;
-  virtual int receive(Payload payload, Payload &out) = 0;
+  virtual int receive_listener(Payload payload, Payload &out) = 0;
 };
 
 // Interface for IComposer

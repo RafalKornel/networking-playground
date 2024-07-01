@@ -3,7 +3,7 @@
 
 class EthernetPhysicalParserTest {
 public:
-  static const int VERBOSE = 0;
+  static const bool VERBOSE = false;
   static int main();
 };
 

@@ -29,6 +29,28 @@ int test_connect_disconnect() {
     return 1;
   }
 
+  // TODO: write tests for sending / receiving
+  {
+    EthernetPhysicalFrame frame = {
+        {0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc},
+        1,
+        {0xcc, 0xcc, 0xcc, 0xcc},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+    };
+
+    auto frame_size = sizeof(EthernetPhysicalFrame);
+
+    auto buffer = shared_ptr<DataType>((DataType *)malloc(frame_size));
+
+    memcpy(buffer.get(), &frame, frame_size);
+
+    Payload payload = {frame_size, buffer};
+
+    Payload out;
+
+    ethernet1.get()->send(payload, out);
+  }
+
   return 0;
 }
 

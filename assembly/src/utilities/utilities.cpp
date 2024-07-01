@@ -11,7 +11,8 @@ void printBufferToConsole(Payload &payload) {
   cout << "Payload: \nSize: " << payload.size << " | ";
 
   for (int i = 0; i < payload.size; ++i) {
-    cout << hex << setw(2) << setfill('0') << static_cast<int>(payload.data[i]);
+    auto a = payload.data;
+    cout << hex << setw(2) << setfill('0') << (payload.data.get()[i]);
   }
 
   cout << endl;

@@ -2,7 +2,9 @@
 #include "../types.h"
 #include "../utilities/utilities.h"
 #include "./ethernet.h"
+#include "connections_manager.h"
 #include <algorithm>
+#include <functional>
 #include <iostream>
 
 using namespace std;
@@ -142,7 +144,13 @@ template <typename TParent>
 int ConnectionsManager<TParent>::has_connection(
     shared_ptr<TParent> parent) const {
   for (int i = 0; i < CONNECTIONS_POOL; i++) {
-    auto currParent = _connections[i].get()->parent;
+    auto currConnection = _connections[i].get();
+
+    if (currConnection == nullptr) {
+      continue;
+    }
+
+    auto currParent = currConnection->parent;
 
     if (currParent.get() == parent.get()) {
       return 0;
@@ -152,15 +160,35 @@ int ConnectionsManager<TParent>::has_connection(
   return 1;
 }
 
-// template <typename TParent>
-// void ConnectionsManager<TParent>::print_connections() {
-//   for (int i = 0; i < CONNECTIONS_POOL; i++) {
-//     auto curr = _connections[i].get();
+template <typename TParent>
+shared_ptr<TParent> ConnectionsManager<TParent>::get_connection(
+    function<bool(shared_ptr<TParent>)> predicate) const {
+  for (int i = 0; i < CONNECTIONS_POOL; i++) {
+    auto currConnection = _connections[i].get();
 
-//     cout << i << '\t' << curr << '\t'
-//          << (curr != nullptr ? printMacAddress(curr->macAddress) : "") <<
-//          endl;
-//   }
+    if (currConnection == nullptr) {
+      continue;
+    }
 
-//   cout << endl;
-// }
+    shared_ptr<TParent> currParent = currConnection->parent;
+
+    auto isResult = predicate(currParent);
+
+    if (isResult) {
+      return shared_ptr<TParent>(currParent);
+    }
+  }
+
+  return shared_ptr<TParent>();
+}
+
+template <typename TParent>
+void ConnectionsManager<TParent>::print_connections() {
+  for (int i = 0; i < CONNECTIONS_POOL; i++) {
+    auto curr = _connections[i];
+
+    cout << i << '\t' << curr << '\t' << endl;
+  }
+
+  cout << endl;
+}

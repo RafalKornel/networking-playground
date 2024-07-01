@@ -5,8 +5,7 @@
 
 using namespace std;
 
-EthernetPhysicalFrame parsePhysicalFrame(unique_ptr<uint8_t[]> buffer);
-EthernetDataLinkFrame parseDataLinkFrame(unique_ptr<uint8_t[]> buffer,
-                                         int length);
+EthernetPhysicalFrame parsePhysicalFrame(Payload payload);
+EthernetDataLinkFrame parseDataLinkFrame(Payload payload);
 
 #endif // MACRO

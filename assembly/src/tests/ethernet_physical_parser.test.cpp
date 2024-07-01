@@ -1,6 +1,7 @@
 #include "./ethernet_physical_parser.test.h"
 #include "../blocks/ethernet.h"
 #include "../blocks/parser.h"
+#include "../types.h"
 #include <iostream>
 #include <memory>
 
@@ -8,31 +9,31 @@ using namespace std;
 
 void printEthernetPhysicalFrame(const EthernetPhysicalFrame &frame) {
   // Print preamble
-  std::cout << "Preamble: ";
+  cout << "Preamble: ";
   for (int i = 0; i < 7; ++i) {
-    std::cout << std::hex << static_cast<int>(frame.preamble[i]) << " ";
+    cout << hex << static_cast<int>(frame.preamble[i]) << " ";
   }
-  std::cout << std::endl;
+  cout << endl;
 
   // Print SFD (Start Frame Delimiter)
-  std::cout << "SFD: " << std::hex << static_cast<int>(frame.sfd) << std::endl;
+  cout << "SFD: " << hex << static_cast<int>(frame.sfd) << endl;
 
   // Print payload of DATA_LINK_FRAME_SIZE bytes
-  std::cout << "Payload:" << std::endl;
+  cout << "Payload:" << endl;
   for (int i = 0; i < DATA_LINK_FRAME_SIZE; ++i) {
-    std::cout << std::hex << static_cast<int>(frame.payload[i]) << " ";
+    cout << hex << static_cast<int>(frame.payload[i]) << " ";
     if ((i + 1) % 16 == 0) { // Print 16 bytes per line
-      std::cout << std::endl;
+      cout << endl;
     }
   }
-  std::cout << std::endl;
+  cout << endl;
 
   // Print inter-packet gap (IPG)
-  std::cout << "IPG: ";
+  cout << "IPG: ";
   for (int i = 0; i < 12; ++i) {
-    std::cout << std::hex << static_cast<int>(frame.ipg[i]) << " ";
+    cout << hex << static_cast<int>(frame.ipg[i]) << " ";
   }
-  std::cout << std::endl;
+  cout << endl;
 }
 
 int test_parsePhysicalFrame() {
@@ -43,11 +44,16 @@ int test_parsePhysicalFrame() {
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
   };
 
-  std::unique_ptr<uint8_t[]> buffer(new uint8_t[sizeof(EthernetPhysicalFrame)]);
+  // unique_ptr<uint8_t> buffer(new uint8_t[sizeof(EthernetPhysicalFrame)]);
+  auto frame_size = sizeof(EthernetPhysicalFrame);
 
-  memcpy(buffer.get(), &frame, sizeof(EthernetPhysicalFrame));
+  auto buffer = shared_ptr<DataType>((DataType *)malloc(frame_size));
 
-  auto parsedFrame = parsePhysicalFrame(std::move(buffer));
+  memcpy(buffer.get(), &frame, frame_size);
+
+  Payload payload = {frame_size, buffer};
+
+  auto parsedFrame = parsePhysicalFrame(payload);
 
   auto result = memcmp(&frame, &parsedFrame, sizeof(EthernetDataLinkFrame));
 
