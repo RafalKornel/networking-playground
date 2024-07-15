@@ -5,13 +5,20 @@
 
 // EMSCRIPTEN_KEEPALIVE
 void test() {
-  auto ethernet1 = new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc});
-  auto ethernet2 = new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc});
+  auto printFrameLambda = [](EthernetDataLinkFrame frame) {
+    std::cout << frame.destignation << frame.fcs << frame.payload
+              << frame.source << frame.type << std::endl;
+  };
 
-  auto composer = new Composer();
+  auto ethernet1 =
+      new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc}, printFrameLambda);
+  auto ethernet2 =
+      new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc}, printFrameLambda);
 
-  composer->add(ethernet1);
-  composer->add(ethernet2);
+  // auto composer = new Composer();
+
+  // composer->add(ethernet1);
+  // composer->add(ethernet2);
 
   // size_t payloadSize = 3;
 

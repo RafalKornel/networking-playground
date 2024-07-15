@@ -21,7 +21,7 @@ class INetworkLayer {
 public:
   virtual ~INetworkLayer() = default;
   virtual int send(Payload payload, Payload &out) = 0;
-  virtual int receive_listener(Payload payload, Payload &out) = 0;
+  virtual int receive(Payload payload, Payload &out) = 0;
 };
 
 // Interface for IComposer

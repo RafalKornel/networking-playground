@@ -43,6 +43,21 @@ static const bitset<64> PREAMBLE_WITH_SFD{"10101010"
 
 static const int INTERPACKET_GAP_LENGTH = 12 * 8;
 
+// THIS IS SOMEWHAT RANDOM, BECAUSE I DON'T KNOW HOW TO HANDLE END OF PACKET
+// FOR NOW :)
+static const bitset<INTERPACKET_GAP_LENGTH> END_OF_FRAME{"00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"
+                                                         "00011000"};
+
 struct EthernetDataLinkFrame {
   uint8_t destignation[6];
   uint8_t source[6];
@@ -58,20 +73,20 @@ struct EthernetPhysicalFrame {
   uint8_t ipg[12];
 };
 
-class Ethernet : public INetworkLayer {
+class Ethernet {
 private:
   bitset<ETHERNET_BUFFER_SIZE> buffer;
-
-  int conjure_package(Payload payload);
+  function<void(EthernetDataLinkFrame out_payload)> consume_callback;
 
 public:
-  Ethernet(const MacAddress &mA);
+  Ethernet(const MacAddress &mA,
+           function<void(EthernetDataLinkFrame out_payload)> consume_callback);
 
   const shared_ptr<ConnectionsManager<Ethernet>> connectionsManager;
   const MacAddress macAddress;
 
-  int receive_listener(Payload payload, Payload &out) override;
-  int send(Payload payload, Payload &out) override;
+  int receive(Payload payload);
+  int send(Payload payload);
 
   int connect(shared_ptr<Ethernet> other);
   int disconnect(shared_ptr<Ethernet> other);
@@ -79,7 +94,7 @@ public:
   bool operator<(const Ethernet &other) const;
 
   int send_bit(bool signal, const MacAddress &mA) const;
-  int receive_bit_listener(bool signal);
+  int receive_bit(bool signal);
 };
 
 #endif

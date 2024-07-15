@@ -9,15 +9,18 @@
 
 using namespace std;
 
-Ethernet::Ethernet(const MacAddress &mA)
+Ethernet::Ethernet(
+    const MacAddress &mA,
+    function<void(EthernetDataLinkFrame out_payload)> consume_callback)
     : macAddress{mA[0], mA[1], mA[2], mA[3], mA[4], mA[5]},
       connectionsManager(shared_ptr<ConnectionsManager<Ethernet>>(
-          new ConnectionsManager<Ethernet>(shared_ptr<Ethernet>(this)))) {}
+          new ConnectionsManager<Ethernet>(shared_ptr<Ethernet>(this)))),
+      consume_callback(consume_callback) {}
 
-int Ethernet::receive_listener(Payload payload, Payload &out) {
-  auto frame = parseDataLinkFrame(payload);
+int Ethernet::receive(Payload payload) {
+  auto data_link_frame = parseDataLinkFrame(payload);
 
-  // should this `out` parameter be changed?
+  consume_callback(data_link_frame);
 
   return 0;
 }
@@ -25,30 +28,37 @@ int Ethernet::receive_listener(Payload payload, Payload &out) {
 // 1) parse payload into data link frame
 // 2) parse physical frame
 // 3) send raw bytes to destignation
-int Ethernet::send(Payload payload, Payload &out) {
-  auto frame = parseDataLinkFrame(payload);
+int Ethernet::send(Payload payload) {
+  auto data_link_frame = parseDataLinkFrame(payload);
 
-  auto lambdaPredicate = [&frame](shared_ptr<Ethernet> e) {
-    auto found =
-        memcmp(e.get()->macAddress, frame.destignation, sizeof(MacAddress));
+  auto connection = connectionsManager.get()->get_connection(
+      [&data_link_frame](shared_ptr<Ethernet> other) {
+        auto found = memcmp(other.get()->macAddress,
+                            data_link_frame.destignation, sizeof(MacAddress));
 
-    return found == 1;
-  };
-
-  auto connection = connectionsManager.get()->get_connection(lambdaPredicate);
+        return found == 0;
+      });
 
   if (connection.get() == nullptr) {
+    cout << "could not find connection" << endl;
     return 1;
   }
 
-  cout << connection.get() << endl;
+  auto physical_frame = createPhysicalFrame(data_link_frame);
 
-  cout << printMacAddress(connection.get()->macAddress) << endl;
+  auto bits_count = sizeof(physical_frame);
 
-  auto bits_count = sizeof(frame) * 8;
+  unsigned char *bufferPtr = (unsigned char *)&physical_frame;
 
-  for (int i = 0; i < bits_count; i++) {
-    // we should dispatch `send_bit` event here
+  for (int i = 0; i < sizeof(physical_frame); i++) {
+    auto byte = bufferPtr[i];
+
+    for (int j = 7; j >= 0; j--) {
+
+      bool bit = (byte >> j) & 1;
+
+      connection.get()->receive_bit(bit);
+    }
   }
 
   return 0;
@@ -70,16 +80,22 @@ bool Ethernet::operator<(const Ethernet &other) const {
   return memcmp(macAddress, other.macAddress, sizeof(MacAddress)) < 0;
 }
 
-int Ethernet::receive_bit_listener(bool bit_value) {
-  // register bit in the buffer
-
+int Ethernet::receive_bit(bool bit_value) {
   buffer <<= 1;
   buffer |= bit_value;
 
-  // check if we should start recording frame data
+  if (buffer.none()) {
+    return 0;
+  }
+
+  bitset<64> last64Bits;
+
+  for (int i = 0; i < 64; i++) {
+    last64Bits[i] = buffer[i];
+  }
 
   bool isPreambleAndSFD =
-      (buffer.to_ullong() & PREAMBLE_WITH_SFD.to_ullong()) ==
+      (last64Bits.to_ullong() & PREAMBLE_WITH_SFD.to_ullong()) ==
       PREAMBLE_WITH_SFD.to_ullong();
 
   if (isPreambleAndSFD) {
@@ -87,35 +103,51 @@ int Ethernet::receive_bit_listener(bool bit_value) {
     return 0;
   }
 
-  // check if we should conjure a package
+  bitset<INTERPACKET_GAP_LENGTH> interpacket_gap;
 
-  bitset<ETHERNET_BUFFER_SIZE> interpacket_gap_mask;
-  interpacket_gap_mask.set();
-  interpacket_gap_mask >>= (INTERPACKET_GAP_LENGTH);
+  bool isEndOfFrame = true;
 
-  if ((buffer & interpacket_gap_mask) == 0) {
+  for (int i = 0; i < INTERPACKET_GAP_LENGTH; i++) {
+    if (buffer[i] != END_OF_FRAME[i]) {
+      isEndOfFrame = false;
+      break;
+    }
+  }
+
+  if (isEndOfFrame) {
+
     buffer >>= (INTERPACKET_GAP_LENGTH);
 
-    buffer <<= ETHERNET_BUFFER_SIZE - DATA_LINK_FRAME_SIZE * 8;
+    const size_t DATA_LINK_BITS_COUNT = sizeof(EthernetDataLinkFrame) * 8;
 
-    auto data = shared_ptr<DataType>(new uint8_t[DATA_LINK_FRAME_SIZE]);
+    bitset<DATA_LINK_BITS_COUNT> flipped;
 
-    auto d = buffer.to_ullong();
+    for (int i = 0; i < DATA_LINK_BITS_COUNT; i++) {
+      flipped[i] = buffer[DATA_LINK_BITS_COUNT - i - 1];
+    }
 
-    memcpy(data.get(), &d, DATA_LINK_FRAME_SIZE);
+    auto data =
+        shared_ptr<DataType>(new uint8_t[sizeof(EthernetDataLinkFrame)]);
+
+    for (size_t i = 0; i < DATA_LINK_FRAME_SIZE; i++) {
+      data.get()[i] = 0;
+
+      u_char byte = 0b00000000;
+
+      for (size_t j = 0; j < 8; j++) {
+        byte <<= 1;
+        byte |= flipped[i * 8 + j];
+      }
+
+      data.get()[i] = byte;
+    }
 
     Payload payload;
     payload.data = data;
     payload.size = DATA_LINK_FRAME_SIZE;
 
-    // here we dispatch event to `receive_listener`
-    // or call it directly?
+    receive(payload);
   }
 
-  return 0;
-}
-
-int Ethernet::send_bit(bool signal, const MacAddress &mA) const {
-  // here we should dispatch event to `receive_bit_listener`
   return 0;
 }

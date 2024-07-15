@@ -1,4 +1,5 @@
 #include "../blocks/ethernet.h"
+#include "../blocks/parser.h"
 #include "../utilities/utilities.h"
 #include "./ethernet.test.h"
 #include <iostream>
@@ -6,11 +7,17 @@
 using namespace std;
 
 int test_connect_disconnect() {
-  auto ethernet1 =
-      shared_ptr<Ethernet>(new Ethernet({0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee}));
 
-  auto ethernet2 =
-      shared_ptr<Ethernet>(new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc}));
+  auto printFrameLambda = [](EthernetDataLinkFrame frame) {
+    std::cout << frame.destignation << frame.fcs << frame.payload
+              << frame.source << frame.type << std::endl;
+  };
+
+  auto ethernet1 = shared_ptr<Ethernet>(
+      new Ethernet({0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee}, printFrameLambda));
+
+  auto ethernet2 = shared_ptr<Ethernet>(
+      new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc}, printFrameLambda));
 
   ethernet1->connect(ethernet2);
   ethernet2->connect(ethernet1);
@@ -29,26 +36,52 @@ int test_connect_disconnect() {
     return 1;
   }
 
-  // TODO: write tests for sending / receiving
-  {
-    EthernetPhysicalFrame frame = {
-        {0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc},
-        1,
-        {0xcc, 0xcc, 0xcc, 0xcc},
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-    };
+  return 0;
+}
 
-    auto frame_size = sizeof(EthernetPhysicalFrame);
+int test_send_receive() {
+  EthernetDataLinkFrame received_frame;
 
-    auto buffer = shared_ptr<DataType>((DataType *)malloc(frame_size));
+  auto emptyLambda = [](EthernetDataLinkFrame frame) {};
 
-    memcpy(buffer.get(), &frame, frame_size);
+  auto ethernet1 = shared_ptr<Ethernet>(
+      new Ethernet({0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee}, emptyLambda));
 
-    Payload payload = {frame_size, buffer};
+  auto ethernet2 = shared_ptr<Ethernet>(
+      new Ethernet({0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc},
+                   [&received_frame](EthernetDataLinkFrame frame) {
+                     received_frame = frame;
+                   }));
 
-    Payload out;
+  ethernet1->connect(ethernet2);
+  ethernet2->connect(ethernet1);
 
-    ethernet1.get()->send(payload, out);
+  EthernetDataLinkFrame expected_frame = {
+      {0xff, 0xcc, 0xff, 0xcc, 0xff, 0xcc}, // Destination
+      {0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee}, // Source
+      0x0800,                               // Type
+      {
+          0xcc,
+          0xcc,
+          0xcc,
+          0xcc,
+      },                       // Payload
+      {0xdd, 0xdd, 0xdd, 0xdd} // FCS
+  };
+
+  auto payload = convertEthernetDataLinkFrameToPayload(expected_frame);
+
+  ethernet1.get()->send(payload);
+
+  if (EthernetTest::VERBOSE) {
+    cout << "expected: " << endl;
+    printEthernetDataLinkFrame(expected_frame);
+    cout << "received: " << endl;
+    printEthernetDataLinkFrame(received_frame);
+  }
+
+  if (!compareEthernetDataLinkFrame(expected_frame, received_frame)) {
+    return 1;
   }
 
   return 0;
@@ -57,11 +90,13 @@ int test_connect_disconnect() {
 int EthernetTest::main() {
   cout << "Ethernet" << endl;
 
-  auto result = test_connect_disconnect();
+  auto result1 = test_connect_disconnect();
+  cout << "\tconnect/disconnect: " << (result1 ? "fail" : "pass") << endl;
 
-  cout << "\tconnect/disconnect: " << (result ? "fail" : "pass") << endl;
+  auto result2 = test_send_receive();
+  cout << "\tsend/receive: " << (result2 ? "fail" : "pass") << endl;
 
-  if (result) {
+  if (result1 || result2) {
     return 1;
   }
 

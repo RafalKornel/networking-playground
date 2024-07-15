@@ -6,7 +6,7 @@ g++ -std=c++17 -c src/utilities/event_listener.cpp -o build/tests/event_listener
 g++ -std=c++17 -c src/tests/event_listener.test.cpp -o build/tests/event_listener.test.o
 
 g++ -std=c++17 -c src/blocks/parser.cpp -o build/tests/parser.o 
-g++ -std=c++17 -c src/tests/ethernet_physical_parser.test.cpp -o build/tests/ethernet_physical_parser.o 
+g++ -std=c++17 -c src/tests/parser.test.cpp -o build/tests/parser.test.o 
 
 g++ -std=c++17 -c src/blocks/connections_manager.cpp -o build/tests/connections_manager.o
 g++ -std=c++17 -c src/tests/connections_manager.test.cpp -o build/tests/connections_manager.test.o

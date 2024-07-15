@@ -58,7 +58,7 @@ int connect_managers_test() {
 
     auto found = *e.get() == 43;
 
-    return found == 1;
+    return found;
   };
 
   auto foundConnection = m1.get()->get_connection(lambdaPredicate);
